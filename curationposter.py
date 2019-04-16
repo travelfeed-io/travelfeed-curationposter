@@ -100,8 +100,11 @@ def get_post():
         if weekday != 2 and weekday != 5:
             fp_country = pycountry.countries.get(alpha_2=fp[5].upper()).name
             fp_subdivision = fp[6]
-            fp_location = '<p>📍<em>'+fp_subdivision+', '+fp_country + \
+            fp_location = '<p>📍<em>'+fp_country + \
                 '</em></p>'
+            if fp_subdivision != None:
+                fp_location = '<p>📍<em>'+fp_subdivision+', '+fp_country + \
+                    '</em></p>'
         featured_post_text += '<center><h4>'+fp_title+' <em> by <a href="https://travelfeed.io/@'+fp_author+'">@'+fp_author+'</a></em></h4>'+fp_location+'</center><blockquote><p>'+fp_preview+'</p></blockquote><center><a href="https://travelfeed.io/@' + \
             fp_author+'/'+fp_permlink+'"><img src="'+fp_img_url + \
             '" alt="'+fp_title + '"/></a></center><hr/>'
