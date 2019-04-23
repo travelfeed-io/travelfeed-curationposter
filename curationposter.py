@@ -14,20 +14,20 @@ from markdown import markdown
 walletpw = os.environ.get('UNLOCK')
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
+logging.basicConfig(filename="curationposter.log", format='%(asctime)s %(levelname)s: %(message)s',
                     level=logging.INFO)  # Log to file: filename=logpath
 
 
-with open('post_templates.json') as json_file:
+with open('post_templates.json', encoding='utf-8') as json_file:
     template = json.load(json_file)
 
 
-def post_to_steem(title, body, app, tags, beneficiaries):
+def post_to_steem(title, body, permlink, app, tags, beneficiaries):
     nl = NodeList()
     node_list = nl.get_nodes()
     steem = Steem(node=node_list)
     steem.wallet.unlock(walletpw)
-    steem.post(title, body, author="travelfeed", json_metadata=None,
+    steem.post(title, body, author="travelfeed", permlink=permlink, json_metadata=None,
                community="travelfeed", app=app, tags=tags, beneficiaries=beneficiaries, parse_body=True)
 
 
@@ -41,19 +41,18 @@ def query_db(country_codes, tag, db_url):
     metadata = db.MetaData()
     hive_posts_cache = db.Table(
         'hive_posts_cache', metadata, autoload=True, autoload_with=engine)
-    # hive_post_tags = db.Table(
-    #     'hive_post_tags', metadata, autoload=True, autoload_with=engine)
+    hive_post_tags = db.Table(
+        'hive_post_tags', metadata, autoload=True, autoload_with=engine)
     created_after = datetime.utcnow()-timedelta(days=7)
-    dayquery = (hive_posts_cache.columns.author != "travelfeed")
     if country_codes != None:
         dayquery = hive_posts_cache.columns.country_code.in_(country_codes)
+    else:
+        # For Wednesday and Satuday round-up query by tag
+        dayquery = hive_posts_cache.columns.post_id.in_(db.select(
+            [hive_post_tags.columns.post_id]).where(hive_post_tags.columns.tag == tag))
     query = db.select([hive_posts_cache.columns.author, hive_posts_cache.columns.permlink, hive_posts_cache.columns.title, hive_posts_cache.columns.preview, hive_posts_cache.columns.img_url, hive_posts_cache.columns.country_code, hive_posts_cache.columns.subdivision]).where(db.and_(hive_posts_cache.columns.is_travelfeed ==
-                                                                                                                                                                                                                                                                                           True, dayquery, hive_posts_cache.columns.depth == 0, hive_posts_cache.columns.curation_score >= 3000, hive_posts_cache.columns.created_at > datetime(created_after.year, created_after.month, created_after.day))).order_by(db.desc(hive_posts_cache.columns.curation_score), hive_posts_cache.columns.total_votes).limit(3)
-    # Todo: Make ordering by total votes as secondary criterium work
-    # Todo: Working tag filter
-    # if country_codes == None:
-    #     query = query.filter(hive_posts_cache.columns.post_id._in(db.select(
-    #         [hive_post_tags.post_id]).where(hive_post_tags.columns.tag == "foodoftheworld")))
+                                                                                                                                                                                                                                                                                           True, hive_posts_cache.columns.author != "travelfeed", dayquery, hive_posts_cache.columns.depth == 0, hive_posts_cache.columns.curation_score >= 3000, hive_posts_cache.columns.created_at > datetime(created_after.year, created_after.month, created_after.day))).order_by(hive_posts_cache.columns.curation_score.desc(), hive_posts_cache.columns.total_votes.desc()).limit(3)
+    # Todo: Feature  each author only once
     ResultProxy = connection.execute(query)
     ResultSet = ResultProxy.fetchall()
     return ResultSet
@@ -76,9 +75,6 @@ def get_post():
     app = post['app']
     country_codes = weekday.get('country_codes', None)
     featured_posts = query_db(country_codes, tag, post['database_connection'])
-    if featured_posts == []:
-        logger.debug("No posts for topic")
-        return
     authorlist = []
     featured_post_text = ""
     for fp in featured_posts:
@@ -110,18 +106,24 @@ def get_post():
             '" alt="'+fp_title + '"/></a></center><hr/>'
     body = post['header'].format(weekday['title']) + weekday['body'] + \
         post['subheader'].format(weekday['title']) + \
-        featured_post_text + post['footer']
+        featured_post_text + post['postsfooter'] + post['footer']
+    if featured_posts == []:
+        body = post['header'].format(weekday['title'])+post['nopoststext'].format(
+            weekday['title'], weekday['title']) + post['footer']
+        logger.debug("No posts for topic")
     beneficiaries = []
     # remove duplicates, oder alphabetically
     authorlist = sorted(list(dict.fromkeys(authorlist)))
     for a in authorlist:
         beneficiaries += {'account': a, 'weight': 1300},
+    permlink = weekday['title'].lower().replace(
+        ', ', '-').replace(' & ', '-').replace(' ', '-')+"-weekly-round-up-"+weekssincestart
     # logger.info("title: "+title)
     # logger.info("tags: "+str(tags))
     # logger.info("body: "+body)
     # logger.info("beneficiaries:"+str(beneficiaries))
     post_to_steem(title,
-                  body, app, tags, beneficiaries)
+                  body, permlink, app, tags, beneficiaries)
 
 
 if __name__ == '__main__':
