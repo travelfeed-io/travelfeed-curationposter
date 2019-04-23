@@ -1,0 +1,45 @@
+{
+  "post": {
+    "0": {
+      "title": "monday title",
+      "body": "monday description",
+      "tag": "monday",
+      "country_codes": ["mo"]
+    },
+    "1": {
+      "title": "tuesday title",
+      "body": "tuesday description",
+      "tag": "tuesday",
+      "country_codes": ["tu"]
+    },
+    "2": {
+      "title": "wednesday title",
+      "body": "wednesday description",
+      "tag": "wednesday"
+    },
+    "3": {
+      "title": "thursday title",
+      "body": "thursday description",
+      "tag": "thursday",
+      "country_codes": ["th"]
+    },
+    "4": {
+      "title": "friday title",
+      "body": "friday description",
+      "tag": "friday",
+      "country_codes": ["fr", "fd"]
+    },
+    "5": {
+      "title": "saturday title",
+      "body": "saturday description",
+      "tag": "saturday"
+    },
+    "header": "<h5>Header</h5><br>",
+    "subheader": "<p>Some text</p>",
+    "postsfooter": "<p>Some footer only if posts found</p>",
+    "footer": "<p>Footer for every post</p>",
+    "nopoststext": "<p>There were no posts :(</p>",
+    "app": "curationposter/0.0.1",
+    "database_connection": "postgresql://localhost:5432/hive"
+  }
+}
