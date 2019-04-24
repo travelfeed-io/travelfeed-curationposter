@@ -67,13 +67,13 @@ def get_post():
     weekssincestart = str(
         abs((date(2018, 2, 19) - date.today()).days/7)).split('.')[0]
     post = template['post']
-    weekday = post[str(weekday)]
-    title = weekday['title']+" - Weekly Round-Up #"+weekssincestart
-    tag = weekday['tag']
+    dailytheme = post[str(weekday)]
+    title = dailytheme['title']+" - Weekly Round-Up #"+weekssincestart
+    tag = dailytheme['tag']
     tags = ["travelfeed",
             "travelfeeddaily", "travel", "curation", tag]
     app = post['app']
-    country_codes = weekday.get('country_codes', None)
+    country_codes = dailytheme.get('country_codes', None)
     featured_posts = query_db(country_codes, tag, post['database_connection'])
     authorlist = []
     featured_post_text = ""
@@ -104,19 +104,19 @@ def get_post():
         featured_post_text += '<center><h4>'+fp_title+' <em> by <a href="https://travelfeed.io/@'+fp_author+'">@'+fp_author+'</a></em></h4>'+fp_location+'</center><blockquote><p>'+fp_preview+'</p></blockquote><center><a href="https://travelfeed.io/@' + \
             fp_author+'/'+fp_permlink+'"><img src="'+fp_img_url + \
             '" alt="'+fp_title + '"/></a></center><hr/>'
-    body = post['header'].format(weekday['title']) + weekday['body'] + \
-        post['subheader'].format(weekday['title']) + \
+    body = post['header'].format(dailytheme['title']) + dailytheme['body'] + \
+        post['subheader'].format(dailytheme['title']) + \
         featured_post_text + post['postsfooter'] + post['footer']
     if featured_posts == []:
-        body = post['header'].format(weekday['title'])+post['nopoststext'].format(
-            weekday['title'], weekday['title']) + post['footer']
+        body = post['header'].format(dailytheme['title'])+post['nopoststext'].format(
+            dailytheme['title'], dailytheme['title']) + post['footer']
         logger.debug("No posts for topic")
     beneficiaries = []
     # remove duplicates, oder alphabetically
     authorlist = sorted(list(dict.fromkeys(authorlist)))
     for a in authorlist:
         beneficiaries += {'account': a, 'weight': 1300},
-    permlink = weekday['title'].lower().replace(
+    permlink = dailytheme['title'].lower().replace(
         ', ', '-').replace(' & ', '-').replace(' ', '-')+"-weekly-round-up-"+weekssincestart
     # logger.info("title: "+title)
     # logger.info("tags: "+str(tags))
