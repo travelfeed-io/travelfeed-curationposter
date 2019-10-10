@@ -1,15 +1,20 @@
+#!/usr/bin/python
+# -*- coding: utf8 -*-
+
 import json
-import os
 import logging
-import markdown
+import os
 import re
+from datetime import date, datetime, timedelta
+
+import markdown
 import pycountry
 import sqlalchemy as db
-from datetime import datetime, date, timedelta
-from beem import Steem
-from beem.nodelist import NodeList
 from bs4 import BeautifulSoup
 from markdown import markdown
+
+from beem import Steem
+from beem.nodelist import NodeList
 
 walletpw = os.environ.get('UNLOCK')
 
@@ -23,8 +28,8 @@ with open('post_templates.json', encoding='utf-8') as json_file:
 
 
 def post_to_steem(title, body, permlink, app, tags, beneficiaries):
-    nl = NodeList()
-    node_list = nl.get_nodes()
+    node_list = ['https://steemd.minnowsupportproject.org', 'https://rpc.usesteem.com', 'https://anyx.io',
+                 'https://api.steemit.com', 'https://steemd.privex.io']
     steem = Steem(node=node_list)
     steem.wallet.unlock(walletpw)
     steem.post(title, body, author="travelfeed", permlink=permlink, json_metadata=None,
@@ -62,16 +67,16 @@ def get_post():
     today = datetime.utcnow()
     todate = today.date()
     weekday = todate.weekday()
-    if weekday == 6:
-        return
+    if weekday == 4:
+        weekday = 5
     weekssincestart = str(
         abs((date(2018, 2, 19) - date.today()).days/7)).split('.')[0]
     post = template['post']
     dailytheme = post[str(weekday)]
     title = dailytheme['title']+" - Weekly Round-Up #"+weekssincestart
     tag = dailytheme['tag']
-    tags = ["travelfeed",
-            "travelfeeddaily", "travel", "curation", tag]
+    tags = ["travelfeed", "travel", "fundition-81n9hwooj", "palnet", tag,
+            "travelfeeddaily", "neoxian"]
     app = post['app']
     country_codes = dailytheme.get('country_codes', None)
     featured_posts = query_db(country_codes, tag, post['database_connection'])
@@ -103,7 +108,7 @@ def get_post():
                     '</em></p>'
         featured_post_text += '<center><h4>'+fp_title+' <em> by <a href="https://travelfeed.io/@'+fp_author+'">@'+fp_author+'</a></em></h4>'+fp_location+'</center><blockquote><p>'+fp_preview+'</p></blockquote><center><a href="https://travelfeed.io/@' + \
             fp_author+'/'+fp_permlink+'"><img src="'+fp_img_url + \
-            '" alt="'+fp_title + '"/></a></center><hr/>'
+            '" /></a></center><hr/>'
     body = post['header'].format(dailytheme['title']) + dailytheme['body'] + \
         post['subheader'].format(dailytheme['title']) + \
         featured_post_text + post['postsfooter'] + post['footer']
