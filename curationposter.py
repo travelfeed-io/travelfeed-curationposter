@@ -55,9 +55,8 @@ def query_db(country_codes, tag, db_url):
         # For Wednesday and Satuday round-up query by tag
         dayquery = hive_posts_cache.columns.post_id.in_(db.select(
             [hive_post_tags.columns.post_id]).where(hive_post_tags.columns.tag == tag))
-    query = db.select([hive_posts_cache.columns.author, hive_posts_cache.columns.permlink, hive_posts_cache.columns.title, hive_posts_cache.columns.preview, hive_posts_cache.columns.img_url, hive_posts_cache.columns.country_code, hive_posts_cache.columns.subdivision]).where(db.and_(hive_posts_cache.columns.is_travelfeed ==
-                                                                                                                                                                                                                                                                                           True, hive_posts_cache.columns.author != "travelfeed", dayquery, hive_posts_cache.columns.depth == 0, hive_posts_cache.columns.curation_score >= 3000, hive_posts_cache.columns.created_at > datetime(created_after.year, created_after.month, created_after.day))).order_by(hive_posts_cache.columns.curation_score.desc(), hive_posts_cache.columns.total_votes.desc()).limit(3)
-    # Todo: Feature  each author only once
+    query = db.select([hive_posts_cache.columns.author, hive_posts_cache.columns.permlink, hive_posts_cache.columns.title, hive_posts_cache.columns.preview, hive_posts_cache.columns.img_url, hive_posts_cache.columns.country_code, hive_posts_cache.columns.subdivision, hive_posts_cache.columns.json]).where(db.and_(hive_posts_cache.columns.is_travelfeed ==
+                                                                                                                                                                                                                                                                                                                          True, hive_posts_cache.columns.author != "travelfeed", dayquery, hive_posts_cache.columns.depth == 0, hive_posts_cache.columns.curation_score >= 3000, hive_posts_cache.columns.created_at > datetime(created_after.year, created_after.month, created_after.day))).order_by(hive_posts_cache.columns.curation_score.desc(), hive_posts_cache.columns.total_votes.desc())
     ResultProxy = connection.execute(query)
     ResultSet = ResultProxy.fetchall()
     return ResultSet
@@ -82,7 +81,20 @@ def get_post():
     featured_posts = query_db(country_codes, tag, post['database_connection'])
     authorlist = []
     featured_post_text = ""
+    selected_featured_posts = []
+    count = 0
+    authorcandidateslist = []
     for fp in featured_posts:
+        try:
+            data = json.loads(fp[7])
+            if data['app'].split('/')[0] == 'travelfeed' and fp[0] not in authorcandidateslist and count < 3:
+                authorcandidateslist += [fp[0]]
+                count += 1
+                selected_featured_posts += [fp]
+        except Exception as e:
+            print(e)
+            continue
+    for fp in selected_featured_posts:
         fp_author = fp[0]
         authorlist += [fp_author]
         fp_permlink = fp[1]
