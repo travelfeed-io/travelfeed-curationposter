@@ -124,7 +124,7 @@ def get_post():
     body = post['header'].format(dailytheme['title']) + dailytheme['body'] + \
         post['subheader'].format(dailytheme['title']) + \
         featured_post_text + post['postsfooter'] + post['footer']
-    if featured_posts == []:
+    if selected_featured_posts == []:
         body = post['header'].format(dailytheme['title'])+post['nopoststext'].format(
             dailytheme['title'], dailytheme['title']) + post['footer']
         logger.debug("No posts for topic")
