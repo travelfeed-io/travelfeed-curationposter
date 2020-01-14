@@ -10,11 +10,10 @@ from datetime import date, datetime, timedelta
 import markdown
 import pycountry
 import sqlalchemy as db
-from bs4 import BeautifulSoup
-from markdown import markdown
-
 from beem import Steem
 from beem.nodelist import NodeList
+from bs4 import BeautifulSoup
+from markdown import markdown
 
 walletpw = os.environ.get('UNLOCK')
 
@@ -105,6 +104,9 @@ def get_post():
         fp_preview = re.sub(caption_regex, '', markdown(fp[3]))
         fp_preview = BeautifulSoup(
             fp_preview, features="html.parser").get_text()
+        fp_preview = re.sub(r'\'', '’', fp_preview)
+        fp_preview = re.sub(r'\"', '”', fp_preview)
+        fp_preview = re.sub(r'\n', '', fp_preview)
         fp_preview = re.sub(link_regex, '', fp_preview)
         fp_preview = re.sub(image_regex, '', fp_preview)
         fp_preview = fp_preview[:350]+"[...]"
@@ -118,12 +120,17 @@ def get_post():
             if fp_subdivision != None:
                 fp_location = '<p>📍<em>'+fp_subdivision+', '+fp_country + \
                     '</em></p>'
-        featured_post_text += '<center><h4>'+fp_title+' <em> by <a href="https://travelfeed.io/@'+fp_author+'">@'+fp_author+'</a></em></h4>'+fp_location+'</center><blockquote><p>'+fp_preview+'</p></blockquote><center><a href="https://travelfeed.io/@' + \
-            fp_author+'/'+fp_permlink+'"><img src="'+fp_img_url + \
-            '" /></a></center><hr/>'
-    body = post['header'].format(dailytheme['title']) + dailytheme['body'] + \
+        featured_post_text += '''<div json='{"type": "linkTool", "data": {"link": "https://travelfeed.io/@'''+fp_author+'''/'''+fp_permlink+'''", "meta": {"title": "'''+fp_title+'''", "description": "'''+fp_preview+'''", "image": "'''+fp_img_url+'''", "author": "'''+fp_author+'''", "permlink": "'''+fp_permlink+'''"}}}'><center><h4>''' + \
+            fp_title+''' <em> by <a href="https://travelfeed.io/@'''+fp_author+'''">@'''+fp_author+'''</a></em></h4>'''+fp_location+'''</center><blockquote><p>'''+fp_preview + \
+            '''</p></blockquote><center><a href="https://travelfeed.io/@''' + fp_author+'''/''' + \
+            fp_permlink+'''"><img src="'''+fp_img_url + '''" /></a></center></div><hr/>'''
+    permlink = dailytheme['title'].lower().replace(
+        ', ', '-').replace(' & ', '-').replace(' ', '-')+"-weekly-round-up-"+weekssincestart
+    body = '<a href="https://travelfeed.io/@travelfeed/{}"><center><h3>Read "{}" on TravelFeed.io for the best experience</h3></center></a><hr />\n\n'.format(permlink, title)+post['header'].format(dailytheme['title']) + dailytheme['body'] + \
         post['subheader'].format(dailytheme['title']) + \
-        featured_post_text + post['postsfooter'] + post['footer']
+        featured_post_text + post['postsfooter'] + post['footer'] + \
+        '\n\n---\n\nView this post [on TravelFeed](https://travelfeed.io/@travelfeed/{}) for the best experience.'.format(
+        permlink)
     if selected_featured_posts == []:
         body = post['header'].format(dailytheme['title'])+post['nopoststext'].format(
             dailytheme['title'], dailytheme['title']) + post['footer']
@@ -133,8 +140,6 @@ def get_post():
     authorlist = sorted(list(dict.fromkeys(authorlist)))
     for a in authorlist:
         beneficiaries += {'account': a, 'weight': 1300},
-    permlink = dailytheme['title'].lower().replace(
-        ', ', '-').replace(' & ', '-').replace(' ', '-')+"-weekly-round-up-"+weekssincestart
     # logger.info("title: "+title)
     # logger.info("tags: "+str(tags))
     # logger.info("body: "+body)
