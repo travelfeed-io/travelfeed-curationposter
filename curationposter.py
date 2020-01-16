@@ -98,6 +98,8 @@ def get_post():
         authorlist += [fp_author]
         fp_permlink = fp[1]
         fp_title = fp[2]
+        fp_title = re.sub(r'\'', '’', fp_title)
+        fp_title = re.sub(r'\"', '”', fp_title)
         caption_regex = r'<h.>.*</h.>'
         link_regex = r'/(?:https?|ftp):\/\/[\n\S]+/g'
         image_regex = r'''(https?:\/\/(?:[-a-zA-Z0-9._]*[-a-zA-Z0-9])(?::\d{2,5})?(?:[/?#](?:[^\s\"'<>\][()]*[^\s\"'<>\][().,])?(?:(?:\.(?:tiff?|jpe?g|png|svg|ico)|ipfs\/[a-z\d]{40,}))))'''
