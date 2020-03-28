@@ -21,18 +21,28 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(filename="curationposter.log", format='%(asctime)s %(levelname)s: %(message)s',
                     level=logging.INFO)  # Log to file: filename=logpath
 
+nodelist = NodeList()
+nodelist.update_nodes()
+
 
 with open('post_templates.json', encoding='utf-8') as json_file:
     template = json.load(json_file)
 
 
 def post_to_steem(title, body, permlink, app, tags, beneficiaries):
-    node_list = ['https://steemd.minnowsupportproject.org', 'https://rpc.usesteem.com', 'https://anyx.io',
-                 'https://api.steemit.com', 'https://steemd.privex.io']
+    node_list = nodelist.get_nodes()
     steem = Steem(node=node_list)
     steem.wallet.unlock(walletpw)
     steem.post(title, body, author="travelfeed", permlink=permlink, json_metadata=None,
                app=app, tags=tags, beneficiaries=beneficiaries, parse_body=True)
+
+
+def post_to_hive(title, body, permlink, app, tags, beneficiaries):
+    hivenode = nodelist.get_nodes(hive=True)
+    hive = Steem(node=hivenode, is_hive=True)
+    hive.wallet.unlock(walletpw)
+    hive.post(title, body, author="travelfeed", permlink=permlink, json_metadata=None,
+              app=app, tags=tags, beneficiaries=beneficiaries, parse_body=True)
 
 
 def query_db(country_codes, tag, db_url):
@@ -148,6 +158,8 @@ def get_post():
     # logger.info("beneficiaries:"+str(beneficiaries))
     post_to_steem(title,
                   body, permlink, app, tags, beneficiaries)
+    post_to_hive(title,
+                 body, permlink, app, tags, beneficiaries)
 
 
 if __name__ == '__main__':
