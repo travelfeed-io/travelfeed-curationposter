@@ -32,7 +32,7 @@ def post_to_steem(title, body, permlink, app, tags, beneficiaries):
     steem = Steem(node=node_list)
     steem.wallet.unlock(walletpw)
     steem.post(title, body, author="travelfeed", permlink=permlink, json_metadata=None,
-               community="travelfeed", app=app, tags=tags, beneficiaries=beneficiaries, parse_body=True)
+               app=app, tags=tags, beneficiaries=beneficiaries, parse_body=True)
 
 
 def query_db(country_codes, tag, db_url):
@@ -73,7 +73,7 @@ def get_post():
     dailytheme = post[str(weekday)]
     title = dailytheme['title']+" - Weekly Round-Up #"+weekssincestart
     tag = dailytheme['tag']
-    tags = ["travelfeed", "travel", "fundition-81n9hwooj", "palnet", tag,
+    tags = ["hive-184437", "travel", "fundition-81n9hwooj", "palnet", tag,
             "travelfeeddaily", "neoxian"]
     app = post['app']
     country_codes = dailytheme.get('country_codes', None)
