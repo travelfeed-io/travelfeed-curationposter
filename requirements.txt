@@ -19,7 +19,7 @@ pycountry==18.12.8
 pycparser==2.19
 pycryptodomex==3.8.1
 pylibscrypt==1.8.0
-pytz==2019.1
+pytz==2019.3
 PyYAML==5.1
 requests==2.21.0
 scrypt==0.8.13
