@@ -17,7 +17,7 @@ prettytable==0.7.2
 psycopg2-binary==2.8.2
 pycountry==18.12.8
 pycparser==2.19
-pycryptodomex==3.8.1
+pycryptodomex==3.9.7
 pylibscrypt==1.8.0
 pytz==2019.1
 PyYAML==5.1
