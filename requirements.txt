@@ -3,7 +3,7 @@ asn1crypto==0.24.0
 beautifulsoup4==4.7.1
 beem==0.20.20
 bs4==0.0.1
-certifi==2019.3.9
+certifi==2019.11.28
 cffi==1.12.2
 chardet==3.0.4
 Click==7.0
