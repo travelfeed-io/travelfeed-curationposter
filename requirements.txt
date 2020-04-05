@@ -10,7 +10,7 @@ Click==7.0
 cryptography==2.6.1
 ecdsa==0.13.3
 Events==0.3
-future==0.17.1
+future==0.18.2
 idna==2.8
 Markdown==3.1
 prettytable==0.7.2
