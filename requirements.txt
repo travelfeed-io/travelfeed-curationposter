@@ -12,7 +12,7 @@ ecdsa==0.13.3
 Events==0.3
 future==0.17.1
 idna==2.8
-Markdown==3.1
+Markdown==3.2.1
 prettytable==0.7.2
 psycopg2-binary==2.8.2
 pycountry==18.12.8
