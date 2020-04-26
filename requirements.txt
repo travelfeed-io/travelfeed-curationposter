@@ -1,7 +1,7 @@
 appdirs==1.4.3
 asn1crypto==0.24.0
 beautifulsoup4==4.7.1
-beem==0.20.20
+beem==0.23.1
 bs4==0.0.1
 certifi==2019.3.9
 cffi==1.12.2
