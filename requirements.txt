@@ -6,7 +6,7 @@ bs4==0.0.1
 certifi==2019.3.9
 cffi==1.12.2
 chardet==3.0.4
-Click==7.0
+Click==7.1.2
 cryptography==2.6.1
 ecdsa==0.13.3
 Events==0.3
